@@ -6,9 +6,9 @@ export default class DBAccess{
 
     constructor(){
         this.#client = new Client({
-            host: process.env.DATABASE_HOST || "10.0.0.19",
+            host: process.env.DATABASE_HOST || "localhost",
             user: process.env.DATABASE_USER || "postgres",
-            password: process.env.DATABASE_PASSWORD || "benni0501",
+            password: process.env.DATABASE_PASSWORD || "",
             database: "url_shortener",
 			//@ts-ignore
 			port: process.env.DATABASE_PORT || 5432,
