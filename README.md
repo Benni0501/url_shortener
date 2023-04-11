@@ -35,5 +35,8 @@ CREATE TABLE IF NOT EXISTS public.url
 ```
 ### Running the application
 - Execute `npm run start`
+
+### For Docker Deployment
+- Build a image with the Dockerfile
 #### For Development
 - Execute `npm run dev`
