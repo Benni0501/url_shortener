@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 export default class DBAccess{
     #client:Client;
-// tssts
+
     constructor(){
         this.#client = new Client({
             host: process.env.DATABASE_HOST || "localhost",
