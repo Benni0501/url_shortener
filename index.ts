@@ -1,8 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import cors from "cors";
 import compression from 'compression';
-import DBAccess from './dbAccess.js';
-import dotenv from 'dotenv';
+import {createClient } from 'redis';
 const app: Express = express();
 const port = 8060;
 const config = process.env;
@@ -11,9 +10,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 app.use(express.static('static'));
-dotenv.config();
-const dbAccess = new DBAccess();
-dbAccess.connect();
+const redisClient = await createClient({
+    url: "redis://10.0.0.19:6379"
+})
+    .on('error', (err: any) => console.log('Redis Client Error', err))
+    .on("connect", () => console.log("connected to redis!"))
+    .connect();
+
 
 const guid = ():string => {
     const s4 = ():string => {
@@ -27,20 +30,22 @@ const guid = ():string => {
 app.post('/', async (req:Request, res:Response) => {
     let url:string = req.body.url;
     let id:string = guid();
-    while(await dbAccess.checkIfIDExists(id) == false){
+    while(await redisClient.EXISTS(id) != 0){
         id = guid();
     }
-    dbAccess.addURL(id, url);
+    redisClient.set(id, url);
     res.send(JSON.stringify({id:id}))
 })
 
 app.get('/:id', async (req:Request, res:Response) => {
-    let url:string = await dbAccess.getUrlforID(req.params.id);
-    if (url == ""){
+    let url:string | null = await redisClient.get(req.params.id);
+    if (url == "" || url == null){
         res.sendStatus(404);
     } else {
         res.redirect(url);
     }
 })
 
-app.listen(port, () => console.log(`Server is runnning on port ${port}`))
+app.listen(port, async () => {
+    console.log(`Server is runnning on port ${port}`)
+} )
